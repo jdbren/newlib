@@ -46,3 +46,6 @@ core
 !core/
 
 lost+found
+
+.DS_Store
+.vscode

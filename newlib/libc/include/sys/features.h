@@ -429,6 +429,34 @@ extern "C" {
 #define _POSIX_THREAD_PRIORITY_SCHEDULING	1
 #endif
 
+#ifdef __lilac__
+#if __POSIX_VISIBLE >= 202405
+#define _POSIX_VERSION				202405L
+#define _POSIX2_VERSION				202405L
+#elif __POSIX_VISIBLE >= 200809
+#define _POSIX_VERSION				200809L
+#define _POSIX2_VERSION				200809L
+#elif __POSIX_VISIBLE >= 200112
+#define _POSIX_VERSION				200112L
+#define _POSIX2_VERSION				200112L
+#elif __POSIX_VISIBLE >= 199506
+#define _POSIX_VERSION				199506L
+#define _POSIX2_VERSION				199506L
+#elif __POSIX_VISIBLE >= 199309
+#define _POSIX_VERSION				199309L
+#define _POSIX2_VERSION				199209L
+#elif __POSIX_VISIBLE >= 199209
+#define _POSIX_VERSION				199009L
+#define _POSIX2_VERSION				199209L
+#elif __POSIX_VISIBLE
+#define _POSIX_VERSION				199009L
+#endif
+#if __XSI_VISIBLE >= 4
+#define _XOPEN_VERSION				__XSI_VISIBLE
+#endif
+#define _POSIX_TIMERS				200809L
+#endif
+
 
 #ifdef __svr4__
 # define _POSIX_JOB_CONTROL     1

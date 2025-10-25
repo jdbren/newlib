@@ -430,6 +430,15 @@ fi
 # THIS TABLE IS ALPHA SORTED.  KEEP IT THAT WAY.
 
 case "${host}" in
+  *-*-lilac*)
+	sys_dir=lilac
+	posix_dir=posix
+	unix_dir=unix
+	newlib_cflags="${newlib_cflags} -DSIGNAL_PROVIDED -DHAVE_NANOSLEEP"
+	newlib_cflags="${newlib_cflags} -D_NO_POSIX_SPAWN"
+	newlib_cflags="${newlib_cflags} -D_NO_GETCWD -D_NO_GETLOGIN -D_NO_GETPASS -D_NO_GETUT"
+	newlib_cflags="${newlib_cflags} -Wno-incompatible-pointer-types -Wno-old-style-definition"
+    ;;
   *-*-cygwin*)
 	posix_dir=posix
 	xdr_dir=xdr

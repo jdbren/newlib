@@ -44,3 +44,7 @@ __getline (char **lptr,
   return __getdelim (lptr, n, '\n', fp);
 }
 
+ssize_t getline (char **lptr, size_t *n, FILE *fp)
+{
+    return __getline(lptr, n, fp);
+}

@@ -67,3 +67,6 @@ endif
 if HAVE_LIBC_SYS_Z8KSIM_DIR
 include %D%/z8ksim/Makefile.inc
 endif
+if HAVE_LIBC_SYS_LILAC_DIR
+include %D%/lilac/Makefile.inc
+endif
