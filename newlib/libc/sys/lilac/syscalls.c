@@ -2,6 +2,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <sys/dirent.h>
+#include <sys/mman.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <signal.h>
@@ -385,8 +386,12 @@ pid_t setsid(void)
 
 int gettimeofday(struct timeval *restrict tv, struct timezone *restrict tz)
 {
-    errno = ENOSYS;
-    return -1;
+    long err = syscall2(SYS_gettimeofday, (long)tv, (long)tz);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
 }
 
 uid_t getuid(void)
@@ -421,6 +426,11 @@ mode_t umask(mode_t mask)
 
 int nanosleep(const struct timespec *duration, struct timespec *rem)
 {
+    long err = syscall2(SYS_nanosleep, (long)duration, (long)rem);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
     return 0;
 }
 
@@ -466,4 +476,30 @@ int fcntl(int fd, int cmd, ...)
         return -1;
     }
     return error;
+}
+
+void * mmap(void *addr, size_t length, int prot, int flags, int fd, off_t offset)
+{
+    long ret = syscall6(SYS_mmap, (long)addr, length, prot, flags, fd, offset);
+    if (ret < 0) {
+        errno = -ret;
+        return MAP_FAILED;
+    }
+    return (void *)ret;
+}
+
+int munmap(void *addr, size_t length)
+{
+    long err = syscall2(SYS_munmap, (long)addr, length);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
+}
+
+int link(const char *existing, const char *new)
+{
+    errno = ENOSYS;
+    return -1;
 }

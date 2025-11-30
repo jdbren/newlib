@@ -45,6 +45,10 @@
 #define SYS_memfd_create 41
 #define SYS_sigsuspend 42
 #define SYS_fcntl 43
+#define SYS_mmap 44
+#define SYS_munmap 45
+#define SYS_nanosleep 46
+#define SYS_gettimeofday 47
 
 #ifdef __cplusplus
 extern "C" {
@@ -93,7 +97,7 @@ static inline long syscall4(long number, long arg0, long arg1, long arg2,
 {
     long ret;
     asm volatile (
-        "mov %4, %r10\n\t"
+        "mov %5, %r10\n\t"
         "syscall" : "=a"(ret) :
         "a"(number), "D"(arg0), "S"(arg1), "d"(arg2), "r"(arg3)
         : "rcx", "r11", "memory", "r10"
@@ -106,11 +110,29 @@ static inline long syscall5(long number, long arg0, long arg1, long arg2,
 {
     long ret;
     asm volatile (
-        "mov %4, %r10\n\t"
-        "mov %5, %r8\n\t"
+        "mov %5, %r10\n\t"
+        "mov %6, %r8\n\t"
         "syscall" : "=a"(ret) :
         "a"(number), "D"(arg0), "S"(arg1), "d"(arg2), "r"(arg3), "r"(arg4)
         : "rcx", "r11", "memory", "r10", "r8"
+    );
+    return ret;
+}
+
+static inline long syscall6(long number, long arg0, long arg1, long arg2,
+    long arg3, long arg4, long arg5)
+{
+    long ret;
+    register long r10 asm("r10") = arg3;
+    register long r8 asm("r8") = arg4;
+    register long r9 asm("r9") = arg5;
+
+    asm volatile (
+        "syscall"
+        : "=a" (ret)
+        : "a" (number), "D" (arg0), "S" (arg1), "d" (arg2),
+          "r" (r10), "r" (r8), "r" (r9)
+        : "rcx", "r11", "memory"
     );
     return ret;
 }
@@ -177,6 +199,18 @@ static inline long syscall5(long number, long arg0, long arg1, long arg2, long a
         "int $0x80" :
         "=a"(ret) :
         "a"(number), "b"(arg0), "c"(arg1), "d"(arg2), "S"(arg3), "D"(arg4)
+    );
+    return ret;
+}
+
+static inline long syscall6(long number, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5)
+{
+    long ret;
+    register long ebp asm("ebp") = arg5;
+    asm volatile(
+        "int $0x80" :
+        "=a"(ret) :
+        "a"(number), "b"(arg0), "c"(arg1), "d"(arg2), "S"(arg3), "D"(arg4), "r"(ebp)
     );
     return ret;
 }
