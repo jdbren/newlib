@@ -206,11 +206,15 @@ static inline long syscall5(long number, long arg0, long arg1, long arg2, long a
 static inline long syscall6(long number, long arg0, long arg1, long arg2, long arg3, long arg4, long arg5)
 {
     long ret;
-    register long ebp asm("ebp") = arg5;
     asm volatile(
-        "int $0x80" :
-        "=a"(ret) :
-        "a"(number), "b"(arg0), "c"(arg1), "d"(arg2), "S"(arg3), "D"(arg4), "r"(ebp)
+        "pushl %%ebp\n\t"
+        "movl %[arg5], %%ebp\n\t"
+        "int $0x80\n\t"
+        "popl %%ebp"
+        : "=a"(ret)
+        : "a"(number), "b"(arg0), "c"(arg1), "d"(arg2),
+          "S"(arg3), "D"(arg4), [arg5]"rm"(arg5)
+        : "memory"
     );
     return ret;
 }
