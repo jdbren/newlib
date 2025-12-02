@@ -584,7 +584,16 @@ dll_list::detach (void *retaddr)
 	  /* Ensure our exception handler is enabled for destructors */
 	  exception protect;
 	  /* Call finalize function if we are not already exiting */
-	  if (!exit_state)
+	  /* For dlopen()'ed DLL, __cxa_finalize() should always be called
+	     at dll detach time. The reason is as follows. In the case that
+	     dlopen()'ed DLL A is dlclose()'ed in the destructor of DLL B,
+	     and the destructor of DLL B is called in exit_state, DLL A will
+	     be unloaded by dlclose(). If __cxa_finalize() for DLL A is not
+	     called here, the destructor of DLL A will be called in exit()
+	     even though DLL A is already unloaded. This causes crash at
+	     exit(). In this case, __cxa_finalize() should be called before
+	     unloading DLL A even in exit_state. */
+	  if (!exit_state || d->type == DLL_LOAD)
 	    __cxa_finalize (d->handle);
 	  d->run_dtors ();
 	}
@@ -609,9 +618,10 @@ dll_list::init ()
   /* Walk the dll chain, initializing each dll */
   dll *d = &start;
   dll_global_dtors_recorded = d->next != NULL;
-  /* Init linked and early loaded Cygwin DLLs. */
+  /* Init linked Cygwin DLLs. As for loaded DLLs, dll::init() is already
+     called via _cygwin_dll_entry called from LoadLibrary(). */
   while ((d = d->next))
-    if (d->type == DLL_LINK || d->type == DLL_LOAD)
+    if (d->type == DLL_LINK)
       d->init ();
 }
 

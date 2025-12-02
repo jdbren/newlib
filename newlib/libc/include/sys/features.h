@@ -105,7 +105,7 @@ extern "C" {
  * _BSD_SOURCE (deprecated by _DEFAULT_SOURCE)
  * _SVID_SOURCE (deprecated by _DEFAULT_SOURCE)
  * _DEFAULT_SOURCE (or none of the above)
- *	POSIX-1.2008 with BSD and SVr4 extensions
+ *	POSIX.1-2024 with BSD and SVr4 extensions
  *
  * _FORTIFY_SOURCE = 1, 2 or 3
  *	Object Size Checking function wrappers
@@ -132,7 +132,7 @@ extern "C" {
 #undef _POSIX_SOURCE
 #define	_POSIX_SOURCE		1
 #undef _POSIX_C_SOURCE
-#define	_POSIX_C_SOURCE		200809L
+#define	_POSIX_C_SOURCE		202405L
 #undef _XOPEN_SOURCE
 #define	_XOPEN_SOURCE		700
 #undef _XOPEN_SOURCE_EXTENDED
@@ -366,18 +366,21 @@ extern "C" {
 #  define __SSP_FORTIFY_LEVEL 0
 #endif
 
-/* RTEMS adheres to POSIX -- 1003.1b with some features from annexes.  */
+/*
+ * RTEMS adheres to POSIX -- 1003.1b with some features from annexes.
+ * Unsupported features are commented out.
+ */
 
 #ifdef __rtems__
-#define _POSIX_JOB_CONTROL		1
-#define _POSIX_SAVED_IDS		1
+/* #define _POSIX_JOB_CONTROL		1 */
+/* #define _POSIX_SAVED_IDS		1 */
 #define _POSIX_VERSION			199309L
 #define _POSIX_ASYNCHRONOUS_IO		1
 #define _POSIX_FSYNC			1
 #define _POSIX_MAPPED_FILES		1
-#define _POSIX_MEMLOCK			1
-#define _POSIX_MEMLOCK_RANGE		1
-#define _POSIX_MEMORY_PROTECTION	1
+/* #define _POSIX_MEMLOCK			1 */
+/* #define _POSIX_MEMLOCK_RANGE		1 */
+/* #define _POSIX_MEMORY_PROTECTION	1 */
 #define _POSIX_MESSAGE_PASSING		1
 #define _POSIX_MONOTONIC_CLOCK		200112L
 #define _POSIX_CLOCK_SELECTION		200112L
