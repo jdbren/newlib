@@ -15,6 +15,7 @@ extern "C" {
 
 #define WIFEXITED(w)	(((w) & 0xff) == 0)
 #define WIFSIGNALED(w)	(((w) & 0x7f) > 0 && (((w) & 0x7f) < 0x7f))
+#define WCOREDUMP(w)	(((w) & 0x80) != 0)
 #define WIFSTOPPED(w)	(((w) & 0xff) == 0x7f)
 #define WIFCONTINUED(w)	((w) == 0xffff)
 #define WEXITSTATUS(w)	(((w) >> 8) & 0xff)

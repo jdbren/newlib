@@ -206,6 +206,16 @@ int sigprocmask(int how, const sigset_t *set, sigset_t *oldset)
     return 0;
 }
 
+int sigsetmask(int mask)
+{
+    long err = syscall3(SYS_sigprocmask, 0, mask, (long)NULL);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
+}
+
 int sigpending(sigset_t *set)
 {
     long err = syscall1(SYS_sigpending, (long)set);
@@ -502,4 +512,45 @@ int link(const char *existing, const char *new)
 {
     errno = ENOSYS;
     return -1;
+}
+
+ssize_t readlink(const char *path, char *buf, size_t bufsiz)
+{
+    errno = ENOSYS;
+    return -1;
+}
+
+int gethostname(char *name, size_t size)
+{
+    if (size < 6) {
+        errno = EINVAL;
+        return -1;
+    }
+    const char *hostname = "lilac";
+    for (size_t i = 0; i < size; i++) {
+        name[i] = hostname[i];
+        if (hostname[i] == '\0')
+            break;
+    }
+}
+
+struct group *getgrgid(gid_t gid)
+{
+    return NULL;
+}
+
+int getpagesize(void)
+{
+    return 4096;
+}
+
+clock_t times(struct tms *buf)
+{
+    errno = ENOSYS;
+    return -1;
+}
+
+pid_t wait3(int *wstatus, int options, struct rusage *rusage)
+{
+    return waitpid(-1, wstatus, options);
 }
