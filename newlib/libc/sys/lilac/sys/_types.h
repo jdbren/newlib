@@ -26,54 +26,30 @@
 #include <sys/config.h>
 #include <machine/_types.h>
 
-#ifndef __machine_blkcnt_t_defined
 typedef unsigned long __blkcnt_t;
-#endif
 
-#ifndef __machine_blksize_t_defined
 typedef unsigned int __blksize_t;
-#endif
 
-#ifndef __machine_fsblkcnt_t_defined
 typedef __uint64_t __fsblkcnt_t;
-#endif
 
-#ifndef __machine_fsfilcnt_t_defined
 typedef __uint32_t __fsfilcnt_t;
-#endif
 
-#ifndef __machine_off_t_defined
 typedef long _off_t;
-#endif
 
 typedef int __pid_t;
 
-#ifndef __machine_dev_t_defined
 typedef unsigned int __dev_t;
-#endif
 
-#ifndef __machine_uid_t_defined
 typedef unsigned short __uid_t;
-#endif
-#ifndef __machine_gid_t_defined
 typedef unsigned short __gid_t;
-#endif
 
-#ifndef __machine_id_t_defined
 typedef __uint32_t __id_t;
-#endif
 
-#ifndef __machine_ino_t_defined
 typedef unsigned long __ino_t;
-#endif
 
-#ifndef __machine_mode_t_defined
 typedef unsigned int __mode_t;
-#endif
 
-#ifndef __machine_off64_t_defined
 __extension__ typedef long long _off64_t;
-#endif
 
 typedef _off_t __off_t;
 

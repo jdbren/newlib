@@ -45,7 +45,7 @@
 
 #if (defined(__CR16__) || defined(__CR16C__) ||defined(__CR16CP__))
 #ifndef __INT32__
-#define __SMALL_BITFIELDS      
+#define __SMALL_BITFIELDS
 #undef INT_MAX
 #undef UINT_MAX
 #define INT_MAX 32767
@@ -247,6 +247,10 @@
 #define __FILENAME_MAX__ 255
 #define _READ_WRITE_RETURN_TYPE _ssize_t
 #define __DYNAMIC_REENT__
+#endif
+
+#if defined(__lilac__)
+#define _READ_WRITE_RETURN_TYPE _ssize_t
 #endif
 
 #ifndef __EXPORT

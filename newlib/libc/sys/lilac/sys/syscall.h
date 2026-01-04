@@ -21,7 +21,7 @@
 #define SYS_getdents 17
 #define SYS_getcwd 18
 #define SYS_mkdir 19
-#define SYS_unlink 20
+#define SYS_rmdir 20
 #define SYS_dup 21
 #define SYS_pipe 22
 #define SYS_brk 23
@@ -49,6 +49,10 @@
 #define SYS_munmap 45
 #define SYS_nanosleep 46
 #define SYS_gettimeofday 47
+#define SYS_link 48
+#define SYS_unlink 49
+#define SYS_symlink 50
+#define SYS_readlink 51
 
 #ifdef __cplusplus
 extern "C" {

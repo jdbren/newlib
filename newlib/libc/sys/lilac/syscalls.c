@@ -3,15 +3,22 @@
 #include <sys/types.h>
 #include <sys/dirent.h>
 #include <sys/mman.h>
+#include <sys/resource.h>
+#include <sys/time.h>
+#include <sys/times.h>
 #include <stdarg.h>
 #include <errno.h>
 #include <signal.h>
 #include <fcntl.h>
 #include <termios.h>
+#include <time.h>
+#include <unistd.h>
+#include <utime.h>
 
 extern char **environ;
 
-int	access (const char *__path, int __amode)
+// TODO
+int	access(const char *__path, int __amode)
 {
     return 0;
 }
@@ -42,6 +49,16 @@ int stat(const char *pathname, struct stat *buf)
 int	mkdir(const char *_path, mode_t __mode)
 {
     long err = syscall2(SYS_mkdir, (long)_path, (long)__mode);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
+}
+
+int rmdir(const char *path)
+{
+    long err = syscall1(SYS_rmdir, (long)path);
     if (err < 0) {
         errno = -err;
         return -1;
@@ -86,9 +103,9 @@ int chdir(const char *path)
     return 0;
 }
 
-int read(int file, char *ptr, int len)
+ssize_t read(int fd, void *ptr, size_t len)
 {
-    long bytes = syscall3(SYS_read, file, (long)ptr, len);
+    long bytes = syscall3(SYS_read, fd, (long)ptr, len);
     if (bytes < 0) {
         errno = -bytes;
         return -1;
@@ -96,19 +113,19 @@ int read(int file, char *ptr, int len)
     return bytes;
 }
 
-int lseek (int file, int ptr, int dir)
+off_t lseek (int fd, off_t offset, int whence)
 {
-    long offset = syscall3(SYS_lseek, file, (long)ptr, dir);
-    if (offset < 0) {
+    long ret = syscall3(SYS_lseek, fd, offset, whence);
+    if (ret < 0) {
         errno = -offset;
         return -1;
     }
-    return offset;
+    return ret;
 }
 
-int write(int file, char *ptr, int len)
+ssize_t write(int fd, const void *ptr, size_t len)
 {
-    long bytes = syscall3(SYS_write, file, (long)ptr, len);
+    long bytes = syscall3(SYS_write, fd, (long)ptr, len);
     if (bytes < 0) {
         errno = -bytes;
         return -1;
@@ -116,9 +133,9 @@ int write(int file, char *ptr, int len)
     return bytes;
 }
 
-int close(int file)
+int close(int fd)
 {
-    long err = syscall1(SYS_close, file);
+    long err = syscall1(SYS_close, fd);
     if (err < 0) {
         errno = -err;
         return -1;
@@ -126,9 +143,9 @@ int close(int file)
     return 0;
 }
 
-caddr_t sbrk (int incr)
+void * sbrk (ptrdiff_t incr)
 {
-    caddr_t ptr = (caddr_t)syscall1(SYS_sbrk, incr);
+    void *ptr = (void*)syscall1(SYS_sbrk, incr);
     if (ptr == (caddr_t)-1) {
         errno = ENOMEM;
         return (caddr_t)-1;
@@ -136,9 +153,9 @@ caddr_t sbrk (int incr)
     return ptr;
 }
 
-int fstat (int file, struct stat *st)
+int fstat (int fd, struct stat *st)
 {
-    long err = syscall2(SYS_fstat, file, (uintptr_t)st);
+    long err = syscall2(SYS_fstat, fd, (long)st);
     if (err < 0) {
         errno = err;
         return -1;
@@ -146,22 +163,29 @@ int fstat (int file, struct stat *st)
     return 0;
 }
 
+// TODO
 int lstat (const char *path, struct stat *st)
 {
     return stat(path, st);
 }
 
-int unlink()
+int unlink(const char *path)
 {
-    return -1;
+    long err = syscall1(SYS_unlink, (long)path);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
 }
 
+// TODO
 int _isatty(int fd)
 {
     return 1;
 }
 
-int kill(int pid, int sig)
+int kill(pid_t pid, int sig)
 {
     long err = syscall2(SYS_kill, pid, sig);
     if (err < 0) {
@@ -171,7 +195,7 @@ int kill(int pid, int sig)
     return err;
 }
 
-int killpg (pid_t pgrp, int sig)
+int killpg(pid_t pgrp, int sig)
 {
     return kill (-pgrp, sig);
 }
@@ -255,7 +279,7 @@ char * getcwd(char *buf, size_t size)
 
 char * getwd(char *buf)
 {
-    return getcwd(buf, 64); // FIXME: use PATH_MAX
+    return getcwd(buf, 1024); // FIXME: use PATH_MAX
 }
 
 int truncate(const char *path, off_t length)
@@ -278,12 +302,7 @@ int fchmod(int fd, mode_t mode)
     return -1;
 }
 
-int chown(const char *path, short owner, short group)
-{
-    return  -1;
-}
-
-int utime (const char *path, char *times)
+int chown(const char *path, uid_t owner, gid_t group)
 {
     return -1;
 }
@@ -394,7 +413,7 @@ pid_t setsid(void)
     return pid;
 }
 
-int gettimeofday(struct timeval *restrict tv, struct timezone *restrict tz)
+int gettimeofday(struct timeval *restrict tv, void *restrict tz)
 {
     long err = syscall2(SYS_gettimeofday, (long)tv, (long)tz);
     if (err < 0) {
@@ -508,16 +527,34 @@ int munmap(void *addr, size_t length)
     return 0;
 }
 
-int link(const char *existing, const char *new)
+int link(const char *existing, const char *newpath)
 {
-    errno = ENOSYS;
-    return -1;
+    long err = syscall2(SYS_link, (long)existing, (long)newpath);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
 }
 
 ssize_t readlink(const char *path, char *buf, size_t bufsiz)
 {
-    errno = ENOSYS;
-    return -1;
+    long err = syscall3(SYS_readlink, (long)path, (long)buf, bufsiz);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return err;
+}
+
+int symlink(const char *target, const char *linkpath)
+{
+    long err = syscall2(SYS_symlink, (long)target, (long)linkpath);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
 }
 
 int gethostname(char *name, size_t size)
@@ -553,4 +590,34 @@ clock_t times(struct tms *buf)
 pid_t wait3(int *wstatus, int options, struct rusage *rusage)
 {
     return waitpid(-1, wstatus, options);
+}
+
+#define _SC_PAGESIZE 8
+
+long sysconf(int name)
+{
+    switch (name) {
+    case _SC_PAGESIZE:
+        return 4096;
+    default:
+        errno = EINVAL;
+        return -1;
+    }
+    return -1; /* Can't get here */
+}
+
+/*time_t time(time_t *tloc)
+{
+    long t = syscall1(SYS_time, (long)tloc);
+    if (t < 0) {
+        errno = -t;
+        return (time_t)-1;
+    }
+    return (time_t)t;
+}*/
+
+// TODO
+int utime(const char *filename, const struct utimbuf *times)
+{
+    return 0;
 }
