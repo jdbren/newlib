@@ -250,6 +250,16 @@ int sigpending(sigset_t *set)
     return 0;
 }
 
+int pause(void)
+{
+    long err = syscall0(SYS_pause);
+    if (err < 0) {
+        errno = -err;
+        return -1;
+    }
+    return 0;
+}
+
 int sigsuspend(const sigset_t *set)
 {
     long err = syscall1(SYS_sigsuspend, (long)set);
@@ -465,8 +475,12 @@ int nanosleep(const struct timespec *duration, struct timespec *rem)
 
 unsigned int alarm(unsigned int seconds)
 {
-    errno = ENOSYS;
-    return 0;
+    long ret = syscall1(SYS_alarm, seconds);
+    if (ret < 0) {
+        errno = -ret;
+        return -1;
+    }
+    return (unsigned int)ret;
 }
 
 int ioctl(int fd, int op, ...)

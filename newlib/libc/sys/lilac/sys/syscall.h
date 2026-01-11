@@ -53,6 +53,8 @@
 #define SYS_unlink 49
 #define SYS_symlink 50
 #define SYS_readlink 51
+#define SYS_alarm 52
+#define SYS_pause 53
 
 #ifdef __cplusplus
 extern "C" {
